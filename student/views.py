@@ -13,7 +13,7 @@ def students(request):
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd='PKSFall2021!*',  # "mypassword",
+        passwd='enter your password',  # "mypassword",
         auth_plugin='mysql_native_password',
         database="university",
     )
