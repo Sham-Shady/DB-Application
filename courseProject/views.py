@@ -8,7 +8,7 @@ def admin(request):
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd='PKSFall2021!*',  # "mypassword",
+        passwd='enter your password',  # "mypassword",
         auth_plugin='mysql_native_password',
         database="university",
     )
@@ -22,7 +22,7 @@ def professors_search(request):
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd='PKSFall2021!*',  # "mypassword",
+        passwd='enter your password',  # "mypassword",
         auth_plugin='mysql_native_password',
         database="university",
     )
@@ -43,7 +43,7 @@ def professors_salaries(request):
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd='PKSFall2021!*',  # "mypassword",
+        passwd='enter your password',  # "mypassword",
         auth_plugin='mysql_native_password',
         database="university",
     )
@@ -64,7 +64,7 @@ def professors_studenst(request):
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd='PKSFall2021!*',  # "mypassword",
+        passwd='enter your password',  # "mypassword",
         auth_plugin='mysql_native_password',
         database="university",
     )
