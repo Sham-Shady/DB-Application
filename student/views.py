@@ -1,19 +1,20 @@
 from django.shortcuts import render
 from django.urls import path
-from . import views
+from django.views.decorators.csrf import csrf_exempt, requires_csrf_token,csrf_protect
 from django.http import HttpResponse
+from django.template import RequestContext
 import mysql.connector
 
 # Create your views here.
-urlpatterns = [
-    path("", views.students, name = 'student')
-]
 
 def students(request):
+    return render(results(request), 'studentsView.html')
+@requires_csrf_token
+def results(request):
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd='enter your password',  # "mypassword",
+        passwd='PKSFall2021!*',  # "mypassword",
         auth_plugin='mysql_native_password',
         database="university",
     )
@@ -22,7 +23,8 @@ def students(request):
         search = request.POST.get('search')
 
         mycursor = mydb.cursor()
-        #Still need a where clause for user input
+        # Still need a where clause for user input
+        # WHERE course_id LIKE search
         mycursor.execute('SELECT * FROM section WHERE course_id LIKE search')
 
         data = '<table style="width:400px">'
@@ -30,7 +32,7 @@ def students(request):
             r = ('<tr>' + \
                  '<th>' + str(course_id) + '</th>' + \
                  '<th>' + str(sec_ID) + '</th>' + \
-                 '<th>' + str(semester)+ '</th>' + \
+                 '<th>' + str(semester) + '</th>' + \
                  '<th>' + str(year) + '</th>' + \
                  '<th>' + building + '</th>' + \
                  '<th>' + str(room) + '</th>' + \
@@ -41,5 +43,4 @@ def students(request):
 
         mycursor.close()
         mydb.close()
-
-    return HttpResponse("Hello, student")
+        return  RequestContext(request, data)
