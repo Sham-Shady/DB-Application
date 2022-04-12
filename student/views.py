@@ -7,6 +7,8 @@ import mysql.connector
 
 # Create your views here.
 
+# Carter Peets blank push
+
 def students(request):
     return render(results(request), 'studentsView.html')
 @requires_csrf_token
