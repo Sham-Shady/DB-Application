@@ -21,7 +21,11 @@
 <form action="" method="POST" name="form">
     {% csrf_token %}
     <label for="dept">Enter the department:</label>
-    <input type="dept" id="dept" name="department" />
+    <input type="dept" id="dept" name="department" /> <br>
+    <label for="semester">Enter the semester:</label>
+    <input type="semester" id="semester" name="semester" /> <br>
+    <label for="year">Enter the year:</label>
+    <input type="year" id="year" name="year" />
     <br> <br>
     <button type="submit" name="Search">Search</button>
 
