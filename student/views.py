@@ -13,7 +13,7 @@ def students(request):
     return render(results(request), 'studentsView.html')
 @requires_csrf_token
 def results(request):
-    mydb = mysql.connector.connect(
+    mydb = mysql.connector.connect(  
         host="localhost",
         user="root",
         passwd='PKSFall2021!*',  # "mypassword",
