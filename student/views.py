@@ -25,12 +25,14 @@ def students(request):
 
     if 'Search' in request.POST:
         search = request.POST.get('department')
+        searchsemester = request.POST.get('semester')
+        searchyear = request.POST.get('year')
 
         mycursor = mydb.cursor()
         # Still need a where clause for user input
         # WHERE course_id LIKE search
         mycursor.execute('use university')
-        mycursor.execute("SELECT * FROM section WHERE course_id LIKE '" + str(search) + "%'")
+        mycursor.execute("SELECT * FROM section WHERE course_id LIKE '" + str(search) + "%' AND semester= '" + str(searchsemester) + "' AND year= '" + str(searchyear) + "'")
 
         data = '<table style="width:400px">'
         for (course_id, sec_ID, semester, year, building, room, capacity) in mycursor:
