@@ -18,7 +18,7 @@ def results(request):
         user="root",
         passwd='PKSFall2021!*',  # "mypassword",
         auth_plugin='mysql_native_password',
-        database="university",
+        database="university",  
     )
 
     if 'Search' in request.POST:
