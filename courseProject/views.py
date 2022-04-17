@@ -1,48 +1,91 @@
-from django.shortcuts import render
-from django.urls import path
-from django.views.decorators.csrf import csrf_exempt, requires_csrf_token,csrf_protect
 from django.http import HttpResponse
-from django.template import RequestContext
 import mysql.connector
+from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 
-# Create your views here.
 
-# Carter Peets blank push
+@csrf_exempt
+def home(requests):
+    if 'Studlog' in requests.POST:
+        return redirect('studentlogin')
+    if 'Proflog' in requests.POST:
+        return redirect('professorlogin')
 
-def students(request):
-    return render(results(request), 'studentsView.html')
-@csrf_protect
-def results(request):
+
+    return render(requests, 'home.html')
+
+def admin(request):
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd='your password',  # "mypassword",
+        passwd='KazumaK1ryu!',  # "mypassword",
+        auth_plugin='mysql_native_password',
+        database="university",
+    )
+    return HttpResponse("Hello Student")
+
+
+def professors(request):
+    return HttpResponse("Hello World")
+
+def professors_search(request):
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        passwd='enter your password',  # "mypassword",
         auth_plugin='mysql_native_password',
         database="university",
     )
 
-    if 'Search' in request.POST:
-        search = request.POST.get('search')
+    mycursor = mydb.cursor()
 
-        mycursor = mydb.cursor()
-        # Still need a where clause for user input
-        # WHERE course_id LIKE search
-        mycursor.execute('SELECT * FROM section WHERE course_id LIKE search')
+    mycursor.execute('SELECT * FROM instructor WHERE current_salary>90000')
 
-        data = '<table style="width:400px">'
-        for (course_id, sec_ID, semester, year, building, room, capacity) in mycursor:
-            r = ('<tr>' + \
-                 '<th>' + str(course_id) + '</th>' + \
-                 '<th>' + str(sec_ID) + '</th>' + \
-                 '<th>' + str(semester) + '</th>' + \
-                 '<th>' + str(year) + '</th>' + \
-                 '<th>' + building + '</th>' + \
-                 '<th>' + str(room) + '</th>' + \
-                 '<th>' + str(capacity) + '</th>' + \
-                 '</tr>')
-            data += r
-        data += '</table>'
+    data = '<table style="width:400px">'
 
-        mycursor.close()
-        mydb.close()
-        return  render(request, data)
+    data += '</table>'
+
+    mycursor.close()
+    mydb.close()
+
+
+def professors_salaries(request):
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        passwd='enter your password',  # "mypassword",
+        auth_plugin='mysql_native_password',
+        database="university",
+    )
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute('SELECT * FROM instructor WHERE current_salary>90000')
+
+    data = '<table style="width:400px">'
+
+    data += '</table>'
+
+    mycursor.close()
+    mydb.close()
+
+
+def professors_studenst(request):
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        passwd='enter your password',  # "mypassword",
+        auth_plugin='mysql_native_password',
+        database="university",
+    )
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute('SELECT * FROM instructor WHERE current_salary>90000')
+
+    data = '<table style="width:400px">'
+
+    data += '</table>'
+
+    mycursor.close()
+    mydb.close()
