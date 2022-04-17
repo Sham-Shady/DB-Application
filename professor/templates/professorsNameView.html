@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Professor Name View</title>
+</head>
+
+<body>
+{{error|safe}}
+<!--showing success message-->
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li>{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+            {{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<!--Form with multiple submit buttons-->
+<form action="" method="POST" name="form">
+    {% csrf_token %}
+    <label for="profname">Enter the professor's last name:</label>
+    <input type="profname" id="profname" name="profname" /> <br>
+    <label for="semester">Enter the semester:</label>
+    <input type="semester" id="semester" name="semester" /> <br>
+    <label for="year">Enter the year:</label>
+    <input type="year" id="year" name="year" />
+    <br> <br>
+
+    <button type="submit" name="Create Name List">Create List</button>
+
+</form>
+
+<form action="" method="POST" name="Return">
+    <button type="submit" name="Go Back More" action=" ">Return</button>
+</form>
+</body>
+</html>
