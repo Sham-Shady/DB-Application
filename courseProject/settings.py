@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'student',
+    'professor',
+    'courseProject'
 ]
 
 MIDDLEWARE = [
@@ -77,11 +79,11 @@ WSGI_APPLICATION = 'courseProject.wsgi.application'
 DATABASES = {
 
     'default': {
-             #       'ENGINE': 'django.db.backends.mysql',
+              #    'ENGINE': 'django.db.backends.mysql',
                    'ENGINE': 'mysql.connector.django',
             'NAME': 'university',
             'USER': 'root',
-            'PASSWORD': 'enter your password',
+            'PASSWORD': 'KazumaK1ryu!',
             'HOST': 'localhost'
         }
 }
