@@ -22,9 +22,6 @@ def administrator(request):
     if 'Go Home' in request.POST:
         return redirect('home')
 
-    if 'Go Back' in request.POST:
-        return render(request, 'adminsSalaryView.html')
-
     if 'Go Back to Order' in request.POST:
         return render(request, 'adminsOrderView.html')
 
@@ -35,7 +32,42 @@ def administrator(request):
         return redirect('adminlogin')
 
     if 'Salaries' in request.POST:
-        return render(request, 'adminsSalaryView.html')
+        mycursor = mydb.cursor(buffered=True)
+        mycursor.execute('use university')  # Select database
+
+        mycursor.execute("SHOW TABLES LIKE 'DeptSalaries'")  # Search for tables with name matching criteria
+        tableexistcheck = mycursor.rowcount  # Get the rowcount of the query
+
+        if tableexistcheck == 0:
+            mycursor.execute("CREATE TABLE DeptSalaries (Dept varchar(200), Min int, Max int, Average int);")
+
+        mycursor.execute("SELECT * FROM DeptSalaries;")
+        datacheck = mycursor.rowcount
+
+        if datacheck == 0:
+            mycursor.execute("DELETE FROM DeptSalaries;")
+
+        mycursor.execute("INSERT INTO DeptSalaries (SELECT dept, min(salary), max(salary), avg(salary) FROM instructor GROUP BY dept);")
+        mydb.commit()
+        mycursor.execute("SELECT dept, min(salary), max(salary), avg(salary) FROM instructor GROUP BY dept;")
+
+        data = '<table style="width:400px; border: 1px solid black; border-collapse: collapse"><tr><th>Department</th><th>Min Salary</th><th>Max Salary</th><th>Average Salary</th></tr>'
+        for (dept, min, max, avg) in mycursor:
+            r = ('<tr>' + \
+                 '<td style="border: 1px solid black; border-collapse: collapse">' + str(dept) + '</td>' + \
+                 '<td style="border: 1px solid black; border-collapse: collapse">$' + str(min) + '</td>' + \
+                 '<td style="border: 1px solid black; border-collapse: collapse">$' + str(max) + '</td>' + \
+                 '<td style="border: 1px solid black; border-collapse: collapse">$' + str(avg) + '</td>' + \
+                 '</tr>')
+            data += r
+        data += '</table>'
+
+        dataworking = {'data': data}
+
+        mycursor.close()
+        mydb.close()
+
+        return render(request, 'adminsSalaryResults.html', dataworking)
 
     if 'OrderBy' in request.POST:
         return render(request, 'adminsOrderView.html')
