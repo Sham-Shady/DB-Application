@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Prof Teaching View</title>
+</head>
+<body>
+{{error|safe}}
+<form action="" method="POST" name="form">
+    {% csrf_token %}
+    <label for="semester">Enter the semester:</label>
+    <input type="semester" id="semester" name="semester" /> <br>
+    <label for="year">Enter the year:</label>
+    <input type="year" id="year" name="year" />
+    <br> <br>
+
+    <button type="submit" name="Create Teaching List">Create List</button>
+
+</form>
+
+<form action="" method="POST" name="Return">
+    <button type="submit" name="Go Back More" action=" ">Return</button>
+</form>
+
+
+</body>
+</html>
