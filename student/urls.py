@@ -1,7 +1,12 @@
-from django.urls import path
+from django.urls import path, include
+from django.views.generic import RedirectView
+
 from . import views
 
 urlpatterns = [
-    path("", views.students, name = 'students'),
-    path("student/results", views.results)
+    path("login", views.studentlogin, name='studentlogin'),
+    path("", views.students, name='students'),
+
+
+
 ]
