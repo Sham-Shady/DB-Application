@@ -103,7 +103,6 @@ def professor(request):
                 return render(request, 'professorsResult.html', dataworking)
 
             else:
-
                 # Check if the table created contains any existing data
                 mycursor.execute(
                     "SELECT * FROM " + str(searchprofname) + str(searchsemester) + str(searchyear) + "Number;")
@@ -183,7 +182,7 @@ def professor(request):
                 mydb.close()
                 return render(request, 'professorsNameResult.html', dataworking) # Pass the results to the template and redirect to show results
             else: # If no results found
-
+                mycursor.execute("DELETE FROM " + str(searchprofname) + str(searchsemester) + str(searchyear) + "Names WHERE Name IS NULL;")
                 # Check if the table created contains any existing data
                 mycursor.execute("SELECT * FROM " + str(searchprofname) + str(searchsemester) + str(searchyear) + "Names;")
                 tableemptycheck = mycursor.rowcount
@@ -220,6 +219,10 @@ def professorlogin(request):
     global user
     global pwd
 
+    # Example professor user
+    # Username: Hou
+    # Password: Databases
+
     if 'Login' in request.POST: # If login button is pressed
         # Get user input
         user = request.POST.get('username')
@@ -233,7 +236,24 @@ def professorlogin(request):
                 auth_plugin='mysql_native_password',
                 database="university",
             )
-            return redirect('professor')
+
+            if str(user) == 'root': # For testing purposes, allow root access
+                return redirect('professor')
+
+            mycursor = mydb.cursor(buffered=True)
+            mycursor.execute("USE UNIVERSITY;")
+            mycursor.execute(
+                "SELECT * FROM user WHERE Name = '" + str(user) + "' AND Role = 'Professor';")
+            privilegecheck = mycursor.rowcount
+
+            if privilegecheck == 0:
+                error = "<h1>Invalid Privileges.</h1>"
+                return render(request, 'professorLogin.html', {'error': error})
+
+            else:
+                mycursor.close()
+                mydb.close()
+                return redirect('professor')
 
         except ProgrammingError: # Exception raised if credentials are invalid, so display an error message
             error = "<h1>Invalid Credentials.</h1>"
