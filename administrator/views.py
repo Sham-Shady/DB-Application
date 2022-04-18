@@ -31,6 +31,58 @@ def administrator(request):
     if 'Go Back to Login' in request.POST:
         return redirect('adminlogin')
 
+    if 'ProfTeach' in request.POST:
+        return render(request, 'adminsProfView.html')
+
+    if 'Create Teaching List' in request.POST:
+        searchsemester = request.POST.get('semester')
+        searchyear = request.POST.get('year')
+
+        mycursor = mydb.cursor(buffered=True)
+        mycursor.execute('use university')  # Select database
+
+        mycursor.execute("SHOW TABLES LIKE 'ProfTeaching'")  # Search for tables with name matching criteria
+        tableexistcheck = mycursor.rowcount  # Get the rowcount of the query
+
+        if tableexistcheck == 0:
+            mycursor.execute("CREATE TABLE ProfTeaching (Name varchar(200), Dept varchar(200), StudentNum int);")
+
+        mycursor.execute("SELECT * FROM ProfTeaching;")
+        datacheck = mycursor.rowcount
+
+        if datacheck != 0:
+            mycursor.execute("DELETE FROM ProfTeaching;")
+
+        mycursor.execute(
+            "INSERT INTO ProfTeaching (SELECT A.name, A.dept, count(*) FROM instructor A INNER JOIN teaches B on A.ID = B.ID INNER JOIN takes C on B.course_id = C.course_id AND B.sec_id = C.sec_id WHERE B.semester = '" + str(searchsemester) + "' AND C.semester = '" + str(searchsemester) + "' AND B.year = '" + str(searchyear) + "' AND C.year = '" + str(searchyear) + "' GROUP BY A.name);")
+        mydb.commit()
+        mycursor.execute("SELECT * from ProfTeaching WHERE Name IS NULL;")
+        nullcheck = mycursor.rowcount;
+
+        if nullcheck == 0:
+            mycursor.execute("SELECT A.name, A.dept, count(*) FROM instructor A INNER JOIN teaches B on A.ID = B.ID INNER JOIN takes C on B.course_id = C.course_id AND B.sec_id = C.sec_id WHERE B.semester = '" + str(searchsemester) + "' AND C.semester = '" + str(searchsemester) + "' AND B.year = '" + str(searchyear) + "' AND C.year = '" + str(searchyear) + "' GROUP BY A.name;")
+
+            data = '<table style="width:400px; border: 1px solid black; border-collapse: collapse"><tr><th>Name</th><th>Department</th><th>Number of Students</th></tr>'
+            for (name, dept, num) in mycursor:
+                r = ('<tr>' + \
+                     '<td style="border: 1px solid black; border-collapse: collapse">' + str(name) + '</td>' + \
+                     '<td style="border: 1px solid black; border-collapse: collapse">' + str(dept) + '</td>' + \
+                     '<td style="border: 1px solid black; border-collapse: collapse">' + str(num) + '</td>' + \
+                     '</tr>')
+                data += r
+            data += '</table>'
+
+            dataworking = {'data': data}
+
+            mycursor.close()
+            mydb.close()
+
+            return render(request, 'adminsProfResults.html', dataworking)
+        else:
+            mycursor.execute("DELETE FROM ProfTeaching WHERE Name IS NULL;")
+            error = "<h1>No results found matching the criteria.</h1>"
+            return render(request, 'adminsProfView.html', {'error': error})
+
     if 'Salaries' in request.POST:
         mycursor = mydb.cursor(buffered=True)
         mycursor.execute('use university')  # Select database
@@ -44,7 +96,7 @@ def administrator(request):
         mycursor.execute("SELECT * FROM DeptSalaries;")
         datacheck = mycursor.rowcount
 
-        if datacheck == 0:
+        if datacheck != 0:
             mycursor.execute("DELETE FROM DeptSalaries;")
 
         mycursor.execute("INSERT INTO DeptSalaries (SELECT dept, min(salary), max(salary), avg(salary) FROM instructor GROUP BY dept);")
@@ -89,7 +141,7 @@ def administrator(request):
             mycursor.execute("SELECT * FROM ProfNameSort;")
             datacheck = mycursor.rowcount
 
-            if datacheck == 0:
+            if datacheck != 0:
                 mycursor.execute("DELETE FROM ProfNameSort;")
 
             mycursor.execute("INSERT INTO ProfNameSort (SELECT * FROM instructor ORDER BY name);")
@@ -127,7 +179,7 @@ def administrator(request):
             mycursor.execute("SELECT * FROM ProfDeptSort;")
             datacheck = mycursor.rowcount
 
-            if datacheck == 0:
+            if datacheck != 0:
                 mycursor.execute("DELETE FROM ProfDeptSort;")
 
             mycursor.execute("INSERT INTO ProfDeptSort (SELECT * FROM instructor ORDER BY name);")
@@ -166,7 +218,7 @@ def administrator(request):
             mycursor.execute("SELECT * FROM ProfSalarySort;")
             datacheck = mycursor.rowcount
 
-            if datacheck == 0:
+            if datacheck != 0:
                 mycursor.execute("DELETE FROM ProfSalarySort;")
 
             mycursor.execute("INSERT INTO ProfSalarySort (SELECT * FROM instructor ORDER BY name);")
@@ -191,14 +243,15 @@ def administrator(request):
             mydb.close()
             return render(request, 'adminsOrderResult.html', dataworking)
 
-
-
-
-
     return render(request, 'adminsSelect.html')
 
 @requires_csrf_token
 def adminlogin(request):
+    # Example admin user:
+    # Username: admin
+    # Password: istrator
+
+
     global user
     global pwd
 
@@ -215,7 +268,25 @@ def adminlogin(request):
                 auth_plugin='mysql_native_password',
                 database="university",
             )
-            return redirect('administrator')
+
+            if str(user) == 'root': # For testing purposes, allow root access
+                return redirect('administrator')
+
+            mycursor = mydb.cursor(buffered=True)
+            mycursor.execute("USE UNIVERSITY;")
+            mycursor.execute(
+                "SELECT * FROM user WHERE Name = '" + str(user) + "' AND Role = 'Admin';") # Check if user has correct privileges
+            privilegecheck = mycursor.rowcount
+
+            if privilegecheck == 0: # If user does not have the right role, prevent login and reload
+                error = "<h1>Invalid Privileges.</h1>"
+                return render(request, 'adminLogin.html', {'error': error})
+
+            else: # If user has the right role, allow login
+                mycursor.close()
+                mydb.close()
+                return redirect('administrator')
+
 
         except ProgrammingError: # Exception raised if credentials are invalid, so display an error message
             error = "<h1>Invalid Credentials.</h1>"
