@@ -10,7 +10,8 @@ def home(requests):
         return redirect('studentlogin')
     if 'Proflog' in requests.POST:
         return redirect('professorlogin')
-
+    if 'Adlog' in requests.POST:
+        return redirect('adminlogin')
 
     return render(requests, 'home.html')
 
