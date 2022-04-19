@@ -1,0 +1,22 @@
+CREATE ROLE 'admin', 'professor', 'student';
+
+GRANT SELECT ON university.* TO 'student';
+
+CREATE USER 'username'@'localhost' IDENTIFIED BY 'password'; # Make username and password whatever you want
+
+GRANT 'student' TO 'username'; # Example is student, replace with professor or admin when needed.
+
+flush privileges;
+
+SET GLOBAL ACTIVATE_ALL_ROLES_ON_LOGIN = 1;
+
+*** Try logging in with the new user and password, and see if university shows up in "SHOW DATABASES;" If it does, it should be working. ***
+*** Then try testing the app login with the username and password. ***
+*** If INVALID CREDENTIALS shows up, access is denied for the user. If it's the correct login for the role type, then this is an error. ***
+*** If INVALID PRIVILEGES shows up, do these next steps in MYSQL: ***
+
+USE UNIVERSITY;
+
+CREATE TABLE user (Name varchar(200), Role varchar(200));
+
+INSERT INTO user VALUES ('username', 'student'); # Replace what you need to for your information (replace student with professor for example)
