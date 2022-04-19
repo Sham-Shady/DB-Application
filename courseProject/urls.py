@@ -25,5 +25,6 @@ urlpatterns = [
     path('professors/students', views.professors_studenst),
     path('student',  include('student.urls')),
     path('professor', include('professor.urls')),
-    path('administrator',include('administrator.urls'))
+    path('administrator',include('administrator.urls')),
+    path('registeruser', views.registeruser, name = 'registeruser')
 ]
