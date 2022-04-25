@@ -12,7 +12,7 @@ def administrator(request):
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd='KazumaK1ryu!',  # "mypassword",
+        passwd='password',  # "mypassword",
         auth_plugin='mysql_native_password',
         database="university",
     )
