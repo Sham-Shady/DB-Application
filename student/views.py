@@ -19,7 +19,7 @@ def students(request):
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd='password',  # "mypassword",
+        passwd='KazumaK1ryu!',  # "mypassword",
         auth_plugin='mysql_native_password',
         database="university",
     )
@@ -39,33 +39,38 @@ def students(request):
         searchsemester = request.POST.get('semester')
         searchyear = request.POST.get('year')
 
-        mycursor = mydb.cursor()
+        mycursor = mydb.cursor(buffered=True)
         # Still need a where clause for user input
         # WHERE course_id LIKE search
         mycursor.execute('use university')
-        mycursor.execute("SELECT * FROM section WHERE course_id LIKE '" + str(search) + "%' AND semester= '" + str(searchsemester) + "' AND year= '" + str(searchyear) + "'")
+        mycursor.execute("SELECT * FROM section WHERE course_id LIKE '" + str(search) + "%' AND semester= '" + str(searchsemester) + "' AND year= '" + str(searchyear) + "';")
+        nullcheck = mycursor.rowcount
 
-        data = '<table style="width:400px; border: 1px solid black; border-collapse: collapse"><tr><th>Course_ID</th><th>Section_ID</th><th>Semester</th><th>Year</th><th>Building</th><th>Room</th><th>Capacity</th></tr>'
-        for (course_id, sec_ID, semester, year, building, room, capacity) in mycursor:
-            r = ('<tr>' + \
-                 '<td style="border: 1px solid black; border-collapse: collapse">' + str(course_id) + '</td>' + \
-                 '<td style="border: 1px solid black; border-collapse: collapse">' + str(sec_ID) + '</td>' + \
-                 '<td style="border: 1px solid black; border-collapse: collapse">' + str(semester) + '</td>' + \
-                 '<td style="border: 1px solid black; border-collapse: collapse">' + str(year) + '</td>' + \
-                 '<td style="border: 1px solid black; border-collapse: collapse">' + building + '</td>' + \
-                 '<td style="border: 1px solid black; border-collapse: collapse">' + str(room) + '</td>' + \
-                 '<td style="border: 1px solid black; border-collapse: collapse">' + str(capacity) + '</td>' + \
-                 '</tr>')
-            data += r
-        data += '</table>'
+        if nullcheck == 0:
+            error = "<h1>No results found matching the criteria.</h1>"
+            return render(request, 'studentsView.html', {'error': error})
+        else:
+            mycursor.execute("SELECT * FROM section WHERE course_id LIKE '" + str(search) + "%' AND semester= '" + str(
+                searchsemester) + "' AND year= '" + str(searchyear) + "';")
+            data = '<table style="width:400px; border: 1px solid black; border-collapse: collapse"><tr><th>Course_ID</th><th>Section_ID</th><th>Semester</th><th>Year</th><th>Building</th><th>Room</th><th>Capacity</th></tr>'
+            for (course_id, sec_ID, semester, year, building, room, capacity) in mycursor:
+                r = ('<tr>' + \
+                    '<td style="border: 1px solid black; border-collapse: collapse">' + str(course_id) + '</td>' + \
+                    '<td style="border: 1px solid black; border-collapse: collapse">' + str(sec_ID) + '</td>' + \
+                    '<td style="border: 1px solid black; border-collapse: collapse">' + str(semester) + '</td>' + \
+                     '<td style="border: 1px solid black; border-collapse: collapse">' + str(year) + '</td>' + \
+                     '<td style="border: 1px solid black; border-collapse: collapse">' + building + '</td>' + \
+                     '<td style="border: 1px solid black; border-collapse: collapse">' + str(room) + '</td>' + \
+                     '<td style="border: 1px solid black; border-collapse: collapse">' + str(capacity) + '</td>' + \
+                     '</tr>')
+                data += r
+            data += '</table>'
 
-        dataworking = {'data': data}
-        mycursor.close()
-        mydb.close()
-        return render(request, 'studentsResult.html', dataworking)
-
+            dataworking = {'data': data}
+            mycursor.close()
+            mydb.close()
+            return render(request, 'studentsResult.html', dataworking)
     return render(request, 'studentsView.html')
-
 
 @requires_csrf_token
 def studentlogin(request):
