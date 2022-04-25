@@ -5,12 +5,67 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import requires_csrf_token, csrf_exempt
 from mysql.connector import ProgrammingError
 
+searchprofname = "test"
+
+
+@requires_csrf_token
+def professorlogin(request):
+    global user
+    global pwd
+
+    # Example professor user
+    # Username: Hou
+    # Password: Databases
+
+    if 'Login' in request.POST: # If login button is pressed
+        # Get user input
+        user = request.POST.get('username')
+        pwd = request.POST.get('password')
+
+        try: # Try to sign in with given credentials
+            mydb = mysql.connector.connect(
+                host="localhost",
+                user=str(user),
+                passwd=str(pwd),  # "mypassword",
+                auth_plugin='mysql_native_password',
+                database="university",
+            )
+
+            if str(user) == 'root': # For testing purposes, allow root access
+                return redirect('professor')
+
+            mycursor = mydb.cursor(buffered=True)
+            mycursor.execute("USE UNIVERSITY;")
+            mycursor.execute(
+                "SELECT * FROM user WHERE Name = '" + str(user) + "' AND Role = 'Professor';")
+            privilegecheck = mycursor.rowcount
+
+            if privilegecheck == 0:
+                error = "<h1>Invalid Privileges.</h1>"
+                return render(request, 'professorLogin.html', {'error': error})
+
+            else:
+                searchprofname = request.session.get('searchprofname')
+                request.session['searchprofname'] = str(user)
+                mycursor.close()
+                mydb.close()
+                return redirect('professor')
+
+        except ProgrammingError: # Exception raised if credentials are invalid, so display an error message
+            error = "<h1>Invalid Credentials.</h1>"
+            return render(request, 'professorLogin.html', {'error': error})
+    if 'Go Home' in request.POST:
+        return redirect('home')
+
+    return render(request, 'professorLogin.html')
+
+
 @csrf_exempt
 def professor(request):
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd='password',  # "mypassword",
+        passwd='KazumaK1ryu!',  # "mypassword",
         auth_plugin='mysql_native_password',
         database="university",
     )
@@ -41,7 +96,7 @@ def professor(request):
     # List for Number of Students
     if 'Create List' in request.POST:
         # Get user input
-        searchprofname = request.POST.get('profname')
+        searchprofname = request.session.get('searchprofname')
         searchsemester = request.POST.get('semester')
         searchyear = request.POST.get('year')
 
@@ -141,18 +196,18 @@ def professor(request):
         # Table format will be 'ProfnameSemesterYearNames' i.e. 'Hou12020Names'
 
         ## Get User Input ##
-        searchprofname = request.POST.get('profname')
+        searchprofname = request.session.get('searchprofname')
         searchsemester = request.POST.get('semester')
         searchyear = request.POST.get('year')
 
         mycursor = mydb.cursor(buffered=True) # Set up cursor
         # Still need a where clause for user input
         # WHERE course_id LIKE search
-        mycursor.execute("SHOW TABLES LIKE '" + str(searchprofname) + str(searchsemester) + str(searchyear) + "Names'") # Search for tables with name matching criteria
+        mycursor.execute("SHOW TABLES LIKE '" + str(searchprofname) + str(searchsemester) + str(searchyear) + "Names';") # Search for tables with name matching criteria
         tableexistcheck = mycursor.rowcount # Get the rowcount of the query
 
         if tableexistcheck == 0: # If query returns an empty set, table does not exist, so create it
-            mycursor.execute("CREATE TABLE " + str(searchprofname) + str(searchsemester) + str(searchyear) + "Names (Name varchar(255))")
+            mycursor.execute("CREATE TABLE " + str(searchprofname) + str(searchsemester) + str(searchyear) + "Names (Name varchar(255));")
             mydb.commit()
 
         mycursor.execute('use university') # Select database
@@ -214,52 +269,5 @@ def professor(request):
 
 
 
-@requires_csrf_token
-def professorlogin(request):
-    global user
-    global pwd
 
-    # Example professor user
-    # Username: Hou
-    # Password: Databases
-
-    if 'Login' in request.POST: # If login button is pressed
-        # Get user input
-        user = request.POST.get('username')
-        pwd = request.POST.get('password')
-
-        try: # Try to sign in with given credentials
-            mydb = mysql.connector.connect(
-                host="localhost",
-                user=str(user),
-                passwd=str(pwd),  # "mypassword",
-                auth_plugin='mysql_native_password',
-                database="university",
-            )
-
-            if str(user) == 'root': # For testing purposes, allow root access
-                return redirect('professor')
-
-            mycursor = mydb.cursor(buffered=True)
-            mycursor.execute("USE UNIVERSITY;")
-            mycursor.execute(
-                "SELECT * FROM user WHERE Name = '" + str(user) + "' AND Role = 'Professor';")
-            privilegecheck = mycursor.rowcount
-
-            if privilegecheck == 0:
-                error = "<h1>Invalid Privileges.</h1>"
-                return render(request, 'professorLogin.html', {'error': error})
-
-            else:
-                mycursor.close()
-                mydb.close()
-                return redirect('professor')
-
-        except ProgrammingError: # Exception raised if credentials are invalid, so display an error message
-            error = "<h1>Invalid Credentials.</h1>"
-            return render(request, 'professorLogin.html', {'error': error})
-    if 'Go Home' in request.POST:
-        return redirect('home')
-
-    return render(request, 'professorLogin.html')
 
