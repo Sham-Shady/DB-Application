@@ -12,12 +12,11 @@ def administrator(request):
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd='password',  # "mypassword",
+        passwd='KazumaK1ryu!',  # "mypassword",
         auth_plugin='mysql_native_password',
         database="university",
     )
 
-    # These are all different redirects for Return buttons. Way to make this cleaner?
 
     if 'Go Home' in request.POST:
         return redirect('home')
@@ -39,9 +38,9 @@ def administrator(request):
         searchyear = request.POST.get('year')
 
         mycursor = mydb.cursor(buffered=True)
-        mycursor.execute('use university')  # Select database
+        mycursor.execute('use university;')  # Select database
 
-        mycursor.execute("SHOW TABLES LIKE 'ProfTeaching'")  # Search for tables with name matching criteria
+        mycursor.execute("SHOW TABLES LIKE 'ProfTeaching';")  # Search for tables with name matching criteria
         tableexistcheck = mycursor.rowcount  # Get the rowcount of the query
 
         if tableexistcheck == 0:
@@ -57,11 +56,14 @@ def administrator(request):
             "INSERT INTO ProfTeaching (SELECT A.name, A.dept, count(*) FROM instructor A INNER JOIN teaches B on A.ID = B.ID INNER JOIN takes C on B.course_id = C.course_id AND B.sec_id = C.sec_id WHERE B.semester = '" + str(searchsemester) + "' AND C.semester = '" + str(searchsemester) + "' AND B.year = '" + str(searchyear) + "' AND C.year = '" + str(searchyear) + "' GROUP BY A.name);")
         mydb.commit()
         mycursor.execute("SELECT * from ProfTeaching WHERE Name IS NULL;")
-        nullcheck = mycursor.rowcount;
+        nullcheck = mycursor.rowcount; # Check if set has NULL
 
         if nullcheck == 0:
             mycursor.execute("SELECT A.name, A.dept, count(*) FROM instructor A INNER JOIN teaches B on A.ID = B.ID INNER JOIN takes C on B.course_id = C.course_id AND B.sec_id = C.sec_id WHERE B.semester = '" + str(searchsemester) + "' AND C.semester = '" + str(searchsemester) + "' AND B.year = '" + str(searchyear) + "' AND C.year = '" + str(searchyear) + "' GROUP BY A.name;")
 
+            mycursor.execute(
+                    "INSERT INTO ProfTeaching (SELECT name, dept, replace(count(*), 1, 0) FROM instructor GROUP BY name);")
+            mycursor.execute("SELECT * FROM ProfTeaching;")
             data = '<table style="width:400px; border: 1px solid black; border-collapse: collapse"><tr><th>Name</th><th>Department</th><th>Number of Students</th></tr>'
             for (name, dept, num) in mycursor:
                 r = ('<tr>' + \
@@ -78,10 +80,7 @@ def administrator(request):
             mydb.close()
 
             return render(request, 'adminsProfResults.html', dataworking)
-        else:
-            mycursor.execute("DELETE FROM ProfTeaching WHERE Name IS NULL;")
-            error = "<h1>No results found matching the criteria.</h1>"
-            return render(request, 'adminsProfView.html', {'error': error})
+
 
     if 'Salaries' in request.POST:
         mycursor = mydb.cursor(buffered=True)
@@ -125,7 +124,6 @@ def administrator(request):
         return render(request, 'adminsOrderView.html')
 
     if 'Create Table' in request.POST:
-        # Do stuff
         namesort = request.POST.get('sort')
 
         if namesort == 'name':
@@ -250,7 +248,6 @@ def adminlogin(request):
     # Example admin user:
     # Username: admin
     # Password: istrator
-
 
     global user
     global pwd
