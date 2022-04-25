@@ -21,12 +21,17 @@
 <!--Form with multiple submit buttons-->
 <form action="" method="POST" name="form">
     {% csrf_token %}
-    <label for="profname">Enter the professor's last name:</label>
-    <input type="profname" id="profname" name="profname" /> <br>
     <label for="semester">Enter the semester:</label>
-    <input type="semester" id="semester" name="semester" /> <br>
+        <select name="semester" id="semester">
+        <option value="1">1</option>
+        <option value="2">2</option>
+  </select>
+<br>
     <label for="year">Enter the year:</label>
-    <input type="year" id="year" name="year" />
+        <select name="year" id="year">
+        <option value="2019">2019</option>
+        <option value="2020">2020</option>
+  </select>
     <br> <br>
 
     <button type="submit" name="Create List">Create List</button>
